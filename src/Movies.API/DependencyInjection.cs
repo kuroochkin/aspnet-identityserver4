@@ -33,10 +33,15 @@ public static class DependencyInjection
         app.UseHttpsRedirection();
         app.UseRouting();
         
+        app.MapControllers();
+        
+        var host = app.Services.GetService<IHost>();
+        host?.SeedDatabase();
+        
         return app;
     }
 
-    public static IHost SeedDatabase(this IHost host)
+    private static IHost SeedDatabase(this IHost host)
     {
         using var scope = host.Services.CreateScope();
         var services = scope.ServiceProvider;
