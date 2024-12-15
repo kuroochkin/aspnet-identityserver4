@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Movies.API.Data;
 
@@ -10,14 +11,29 @@ public static class DependencyInjection
     {
         services.AddControllers();
         
-        services.AddDbContext<MoviesAPIContext>(options =>
-            options.UseInMemoryDatabase("MoviesAPIContext"));
-        
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo {Title = "Movies.API", Version = "v1"});
         });
+        
+        services.AddDbContext<MoviesAPIContext>(options =>
+            options.UseInMemoryDatabase("MoviesAPIContext"));
 
+        services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.Authority = "https://localhost:5005";
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false
+                };
+            });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ClientIdPolicy", policy => policy.RequireClaim("client_id", "movieClient"));
+        });
+        
         return services;
     }
     
@@ -32,11 +48,19 @@ public static class DependencyInjection
         
         app.UseHttpsRedirection();
         app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
+        app.MapControllers();
+        
+        var host = app.Services.GetService<IHost>();
+        host?.SeedDatabase();
         
         return app;
     }
 
-    public static IHost SeedDatabase(this IHost host)
+    private static IHost SeedDatabase(this IHost host)
     {
         using var scope = host.Services.CreateScope();
         var services = scope.ServiceProvider;
