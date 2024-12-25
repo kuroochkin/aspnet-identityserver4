@@ -20,7 +20,7 @@ public static class Config
                    },
                    new()
                    {
-                       ClientId = "movies_client",
+                       ClientId = "movies_mvc_client",
                        ClientName = "Movies MVC Web App",
                        AllowedGrantTypes = GrantTypes.Code,
                        AllowRememberConsent = false,

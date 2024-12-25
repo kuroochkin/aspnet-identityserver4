@@ -4,9 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
 
-services.AddControllersWithViews();
-
-services.AddMvcLayer(builder.Configuration);
+services.AddMvcLayer();
 
 var app = builder.Build();
 
@@ -25,6 +23,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
